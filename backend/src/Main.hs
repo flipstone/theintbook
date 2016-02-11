@@ -2,10 +2,16 @@ module Main where
 
 import            Data.Monoid ((<>))
 import qualified  Data.ByteString.Lazy as LBS
+import            Control.Applicative (Alternative)
 import            Control.Concurrent (MVar, newMVar, modifyMVar)
-import            Control.Monad.IO.Class (liftIO)
-import            Happstack.Server ( ServerPart, Response, ToMessage(..)
-                                   , simpleHTTP, nullConf, ok
+import            Control.Monad (MonadPlus)
+import            Control.Monad.IO.Class (liftIO, MonadIO)
+import            Control.Monad.Reader (ReaderT, runReaderT, ask)
+import            Happstack.Server ( ServerPartT, mapServerPartT
+                                   , FilterMonad(..), ServerMonad
+                                   , Response, ToMessage(..)
+                                   , simpleHTTP, nullConf
+                                   , ok, internalServerError
                                    , dirs, nullDir
                                    )
 
@@ -14,12 +20,41 @@ import qualified  Text.Blaze.Html5 as H
 import qualified  Text.Blaze.Html5.Attributes as A
 import            Text.Jasmine (minifyFile)
 import            System.Directory (getModificationTime)
-import            System.Environment (lookupEnv)
+import            System.Environment (lookupEnv, getEnv)
 import            System.Exit (exitWith, ExitCode(ExitFailure))
 import qualified  Data.Time as Time
+import qualified  Database.Redis as Redis
+
+newtype IntBookBackend a = IntBookBackend {
+    unIntBookBackend :: ServerPartT (ReaderT Redis.Connection IO) a
+  } deriving ( Functor
+             , Applicative
+             , Alternative
+             , Monad
+             , MonadPlus
+             , MonadIO
+             , Monoid
+             , ServerMonad
+             )
+
+instance FilterMonad a (ServerPartT (ReaderT Redis.Connection IO))
+      => FilterMonad a IntBookBackend where
+  setFilter = IntBookBackend . setFilter
+  composeFilter = IntBookBackend . composeFilter
+  getFilter = IntBookBackend . getFilter . unIntBookBackend
+
+liftRedis :: Redis.Redis a -> IntBookBackend a
+liftRedis redis = IntBookBackend $ do
+  conn <- ask
+  liftIO $ Redis.runRedis conn redis
+
+runIntBookBackend :: Redis.Connection -> IntBookBackend a -> ServerPartT IO a
+runIntBookBackend conn = mapServerPartT (flip runReaderT conn)
+                       . unIntBookBackend
 
 main :: IO ()
 main = do
+  redisHost <- getEnv "REDIS_HOST"
   frontendJS <- lookupEnv "FRONTEND_JS"
 
   case frontendJS of
@@ -28,21 +63,35 @@ main = do
       exitWith $ ExitFailure 3
 
     Just jsPath -> do
-      jsSource <- newJSSource jsPath
-      simpleHTTP nullConf $ app jsSource
+      redisConn <- Redis.connect $ Redis.defaultConnectInfo {
+                     Redis.connectHost = redisHost
+                   }
 
-app :: JSSource -> ServerPart Response
+      jsSource <- newJSSource jsPath
+      simpleHTTP nullConf $ runIntBookBackend redisConn (app jsSource)
+
+app :: JSSource -> IntBookBackend Response
 app jsSource =
      (dirs "/assets/frontend.js" $ serveJSFile jsSource)
+  <> (dirs "/redis/ping" $ pingRedis)
   <> indexPage
 
-serveJSFile :: JSSource -> ServerPart Response
+pingRedis :: IntBookBackend Response
+pingRedis = do
+  nullDir
+  result <- liftRedis Redis.ping
+
+  case result of
+    Right _ -> ok $ toResponse ("Redis is OK" :: String)
+    Left err -> internalServerError $ toResponse (show err)
+
+serveJSFile :: JSSource -> IntBookBackend Response
 serveJSFile jsSource = do
   nullDir
   minified <- liftIO $ minifyJSSource jsSource
   ok $ toResponse $ minified
 
-indexPage :: ServerPart Response
+indexPage :: IntBookBackend Response
 indexPage = ok $ toResponse $ do
   H.docType
   H.html $ do

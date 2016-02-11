@@ -20,6 +20,11 @@ executable backend
   main-is:             Main.hs
   ghc-options:         -Wall
   default-extensions:  OverloadedStrings
+                     , FlexibleContexts
+                     , FlexibleInstances
+                     , GeneralizedNewtypeDeriving
+                     , MultiParamTypeClasses
+                     , UndecidableInstances
 
   -- other-modules:       
   -- other-extensions:    
@@ -27,7 +32,9 @@ executable backend
                      , blaze-html == 0.8.1.1
                      , bytestring == 0.10.6.0
                      , directory == 1.2.2.0
+                     , mtl == 2.2.1
                      , happstack-server == 7.4.6
+                     , hedis == 0.6.10
                      , hjsmin == 0.1.5.2
                      , time == 1.5.0.1
                      , transformers == 0.4.2.0
