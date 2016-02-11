@@ -1,0 +1,21 @@
+frontend:
+  image: flipstone/theintbook-dev:2016-02-10
+  volumes:
+    - .:/theintbook
+  working_dir: /theintbook/frontend
+  tty: true
+  stdin_open: true
+  command: bash
+
+backend:
+  image: flipstone/theintbook-dev:2016-02-10
+  volumes:
+    - .:/theintbook
+  working_dir: /theintbook/backend
+  ports:
+    - 8000:8000
+  environment:
+    FRONTEND_JS: /theintbook/frontend/.cabal-sandbox/bin//frontend.jsexe/all.js
+  tty: true
+  stdin_open: true
+  command: bash
