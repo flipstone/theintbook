@@ -2,24 +2,22 @@
 
 The Integral Social Network
 
-## Development
-
-### TD;DR
+## Development - TL;DR
 
 ### Main shell
     docker-compose up -d
 
-#### Frontend Shell
+### Frontend Shell
     docker attach theintbook_frontend_1
     cabal install
     
-#### Backend Shell
+### Backend Shell
     docker attach theintbook_backend_1
     cabal install
     cabal repl
     :main
     
-#### Browser
+### Browser
 
     http://localhost:8000
     
