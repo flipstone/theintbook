@@ -4,7 +4,7 @@ import            Happstack.Server (simpleHTTP, nullConf)
 import            System.Environment (getEnv)
 import qualified  Database.Redis as Redis
 
-import            Data.JSSource
+import            Data.JSSource (newJSSource)
 import            IntBook.Backend (runIntBookBackend)
 import            IntBook.Routes (intBookRoutes)
 

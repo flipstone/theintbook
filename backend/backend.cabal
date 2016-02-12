@@ -29,6 +29,8 @@ executable backend
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9
+                     , aeson == 0.11.0.0
+                     , aeson-pretty == 0.7.2
                      , blaze-html == 0.8.1.1
                      , bytestring == 0.10.6.0
                      , directory == 1.2.2.0
@@ -36,6 +38,7 @@ executable backend
                      , happstack-server == 7.4.6
                      , hedis == 0.6.10
                      , hjsmin == 0.1.5.2
+                     , text == 1.2.2.0
                      , time == 1.5.0.1
                      , transformers == 0.4.2.0
   hs-source-dirs:      src

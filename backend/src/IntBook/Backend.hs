@@ -9,7 +9,8 @@ import            Control.Monad (MonadPlus)
 import            Control.Monad.IO.Class (liftIO, MonadIO)
 import            Control.Monad.Reader (ReaderT, runReaderT, ask)
 import            Happstack.Server ( ServerPartT, mapServerPartT
-                                   , FilterMonad(..), ServerMonad
+                                   , FilterMonad(..), ServerMonad, WebMonad
+                                   , Response
                                    )
 import qualified  Database.Redis as Redis
 
@@ -23,6 +24,7 @@ newtype IntBookBackend a = IntBookBackend {
              , MonadIO
              , Monoid
              , ServerMonad
+             , WebMonad Response
              )
 
 instance FilterMonad a (ServerPartT (ReaderT Redis.Connection IO))
