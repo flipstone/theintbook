@@ -16,14 +16,14 @@ import            IntBook.Handlers.ServeJSSource (serveJSFile)
 
 intBookRoutes :: JSSource -> IntBookBackend Response
 intBookRoutes jsSource =
-     dir "api" $ path (\subjectPath ->
+     dir "api" (path (\subjectPath ->
        dir "friend_request" $ path (\objectPath -> do
           subject <- pathToId subjectPath
           object <- pathToId objectPath
 
           atPath "send" (sendFriendRequest subject object)
         )
-     )
+     ))
   <> atPath "/assets/frontend.js" (serveJSFile jsSource)
   <> atPath "/redis/ping" pingRedis
   <> indexPage
