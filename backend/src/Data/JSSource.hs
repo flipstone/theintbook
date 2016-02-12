@@ -5,11 +5,7 @@ module Data.JSSource
 import            Control.Concurrent (MVar, newMVar, modifyMVar)
 import qualified  Data.ByteString.Lazy as LBS
 import qualified  Data.Time as Time
-import            Happstack.Server ( Response, ToMessage(..)
-                                   , simpleHTTP, nullConf
-                                   , ok, internalServerError
-                                   , dirs, nullDir
-                                   )
+import            Happstack.Server (ToMessage(..))
 import            Text.Jasmine (minifyFile)
 import            System.Directory (getModificationTime)
 
