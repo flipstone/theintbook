@@ -11,6 +11,7 @@ import            React.Flux ( ReactView, ReactStore, StoreData(..)
                              , mkStore
                              )
 import qualified  React.Flux as H
+import            History (pushState)
 
 main :: IO ()
 main = reactRender "theintbookApp" mainView ()
@@ -23,6 +24,7 @@ instance StoreData AppData where
   type StoreAction AppData = AppAction
   transform _ appData = do
     response <- sendFriendRequest
+    pushState "The Int Book" "/sent"
     pure $ AppData $ fromMaybe "No Response!" response
 
 appStore :: ReactStore AppData
