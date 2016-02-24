@@ -2,6 +2,7 @@ module Main where
 
 import            Control.DeepSeq (NFData)
 import qualified  Data.ByteString.Char8 as BS
+import qualified  Data.JSString as JSS
 import            Data.Maybe (fromMaybe)
 import            Data.Typeable (Typeable)
 import            GHC.Generics (Generic)
@@ -12,6 +13,8 @@ import            React.Flux ( ReactView, ReactStore, StoreData(..)
                              )
 import qualified  React.Flux as H
 import            History (pushState)
+
+import            IntBook.Backend.Routes (BackendRoute(..), encodeBackendRoute)
 
 main :: IO ()
 main = reactRender "theintbookApp" mainView ()
@@ -46,7 +49,7 @@ sendFriendRequest :: IO (Maybe BS.ByteString)
 sendFriendRequest =
   fmap Ajax.contents $ Ajax.xhrByteString $ Ajax.Request {
     Ajax.reqMethod = Ajax.POST
-  , Ajax.reqURI = "/api/123/friend_request/321/send"
+  , Ajax.reqURI = JSS.pack $ BS.unpack $ encodeBackendRoute (SendFriendRequest "123" "321")
   , Ajax.reqLogin = Nothing
   , Ajax.reqHeaders = []
   , Ajax.reqWithCredentials = False
