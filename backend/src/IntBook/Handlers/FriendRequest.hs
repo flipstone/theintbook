@@ -7,7 +7,8 @@ import qualified  Data.ByteString.Char8 as BS
 import qualified  Database.Redis as Redis
 import            Happstack.Server (Response, ok)
 
-import            Data.IntId (IntId, IntIdable(..))
+import            IntBook.Data.IntId (IntId, IntIdable(..))
+
 import            IntBook.Backend (IntBookBackend, liftRedis)
 import            IntBook.Handlers.Error (internalError)
 import            IntBook.Handlers.Success (successResponse)

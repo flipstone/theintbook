@@ -41,5 +41,7 @@ executable backend
                      , text == 1.2.2.0
                      , time == 1.5.0.1
                      , transformers == 0.4.2.0
+
+                     , backend-routes == 0.1.0.0
   hs-source-dirs:      src
   default-language:    Haskell2010

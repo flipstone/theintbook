@@ -8,6 +8,8 @@ services:
     tty: true
     stdin_open: true
     command: bash
+    environment:
+      ROOT: /theintbook
 
   backend:
     image: flipstone/theintbook-dev:2016-02-10
@@ -19,6 +21,7 @@ services:
     environment:
       FRONTEND_JS: /theintbook/frontend/.cabal-sandbox/bin//frontend.jsexe/all.js
       REDIS_HOST: redis
+      ROOT: /theintbook
     tty: true
     stdin_open: true
     command: bash

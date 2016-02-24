@@ -1,4 +1,4 @@
-module Data.IntId
+module IntBook.Data.IntId
   ( IntId
   , IntIdable(..)
   ) where
@@ -7,6 +7,8 @@ import            Control.Monad (guard)
 
 import qualified  Data.ByteString.Char8 as BS
 import            Data.Char (isDigit)
+import            Data.Maybe (fromMaybe)
+import            Data.String (IsString(..))
 import qualified  Data.Text as T
 import qualified  Data.Text.Encoding as Enc
 
@@ -32,6 +34,12 @@ instance IntIdable String where
   toIntId = toIntId . BS.pack
   fromIntId = BS.unpack . fromIntId
 
+instance IsString IntId where
+  fromString s =
+      fromMaybe (error msg) $ toIntId s
+    where
+      msg = "Invalid IntId String for for IsString: " ++ show s
+
 isNegative :: BS.ByteString -> Bool
 isNegative "" = False
 isNegative bytes = BS.head bytes == '-'
@@ -45,3 +53,4 @@ isValid bytes =
 isValidPositive :: BS.ByteString -> Bool
 isValidPositive bytes = not (BS.null bytes)
                      && BS.all isDigit bytes
+
