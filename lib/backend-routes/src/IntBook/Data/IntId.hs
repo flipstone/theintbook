@@ -1,9 +1,15 @@
+{-# LANGUAGE CPP #-}
 module IntBook.Data.IntId
   ( IntId
   , IntIdable(..)
   ) where
 
 import            Control.Monad (guard)
+
+#ifdef __GHCJS__
+import            GHCJS.Marshal.Pure (pFromJSVal, pToJSVal)
+import            GHCJS.Types (JSVal)
+#endif
 
 import qualified  Data.ByteString.Char8 as BS
 import            Data.Char (isDigit)
@@ -29,6 +35,16 @@ instance IntIdable BS.ByteString where
 instance IntIdable T.Text where
   toIntId = toIntId . Enc.encodeUtf8
   fromIntId = Enc.decodeUtf8 . fromIntId
+
+#ifdef __GHCJS__
+instance IntIdable JSVal where
+  toIntId j = do t <- pFromJSVal j :: Maybe T.Text
+                 toIntId t
+
+  fromIntId i = let t :: T.Text
+                    t = fromIntId i
+                in pToJSVal t
+#endif
 
 instance IntIdable String where
   toIntId = toIntId . BS.pack

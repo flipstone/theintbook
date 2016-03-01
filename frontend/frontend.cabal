@@ -21,14 +21,19 @@ executable frontend
   ghc-options:         -Wall
   default-extensions:  DeriveAnyClass
                      , DeriveGeneric
+                     , ExistentialQuantification
                      , OverloadedStrings
+                     , TemplateHaskell
                      , TypeFamilies
+                     , RankNTypes
+                     , RecordWildCards
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9
                      , bytestring == 0.10.6.0
                      , deepseq == 1.4.1.1
                      , ghcjs-base == 0.2.0.0
+                     , lens == 4.13.2.1
                      , react-flux == 1.0.3
 
                      , backend-routes == 0.1.0.0
