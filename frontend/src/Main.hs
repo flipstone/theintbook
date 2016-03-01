@@ -2,7 +2,6 @@ module Main where
 
 import            Control.Concurrent (forkIO)
 import            Control.DeepSeq (NFData)
-import            Control.Lens (Lens', (&), (.~), (^.))
 import            Control.Monad (void)
 import qualified  Data.ByteString.Char8 as BS
 import qualified  Data.JSString as JSS
@@ -45,7 +44,7 @@ runAction (Action_SetResponse bs) = actionSetResponse bs
 
 actionSendFriendRequest :: AppData -> IO AppData
 actionSendFriendRequest appData = do
-  case appData ^. friendRequestRoute of
+  case friendRequestRoute appData of
     Nothing -> pure ()
     Just route -> void $ forkIO $ sendFriendRequest route
 
@@ -59,15 +58,15 @@ sendFriendRequest route = do
 
 actionSetSender :: JSVal -> AppData -> IO AppData
 actionSetSender jsVal appData = pure $
-  appData & sender .~ (toIntId jsVal)
+  appData { sender = toIntId jsVal }
 
 actionSetRecipient :: JSVal -> AppData -> IO AppData
 actionSetRecipient jsVal appData = pure $
-  appData & recipient .~ (toIntId jsVal)
+  appData { recipient = toIntId jsVal }
 
 actionSetResponse :: BS.ByteString -> AppData -> IO AppData
 actionSetResponse bs appData = pure $
-  appData & apiResponse .~ bs
+  appData { apiResponse = bs }
 
 instance StoreData AppData where
   type StoreAction AppData = AppAction
@@ -75,9 +74,9 @@ instance StoreData AppData where
 
 appStore :: ReactStore AppData
 appStore = mkStore $ AppData {
-    _apiResponse = ""
-  , _sender = Nothing
-  , _recipient = Nothing
+    apiResponse = ""
+  , sender = Nothing
+  , recipient = Nothing
   }
 
 mainView :: ReactView ()
@@ -102,7 +101,7 @@ mainView = defineControllerView "theintbook" appStore $ \appData () -> do
               "Send Friend Request"
 
   H.div_ $ H.h3_ "Ajax Response"
-  H.div_ $ H.elemText $ BS.unpack (appData ^. apiResponse)
+  H.div_ $ H.elemText $ BS.unpack (apiResponse appData)
 
 backendPost :: BackendRoute -> IO (Maybe BS.ByteString)
 backendPost route =
