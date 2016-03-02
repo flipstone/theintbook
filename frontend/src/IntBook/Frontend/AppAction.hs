@@ -24,6 +24,7 @@ import            IntBook.Frontend.AppData ( AppData(..)
                                            , recipient
                                            , friendRequestRoute
                                            )
+import            IntBook.Frontend.Dispatcher (dispatch)
 
 data AppAction =
     Action_SendFriendRequest
@@ -32,11 +33,11 @@ data AppAction =
   | Action_SetResponse BS.ByteString
   deriving (Typeable, Generic, NFData)
 
-sendFriendRequest :: (AppAction -> IO ()) -> BackendRoute -> IO ()
-sendFriendRequest update route = do
+sendFriendRequest :: BackendRoute -> IO ()
+sendFriendRequest route = do
   response <- backendPost route
   pushState "The Int Book" "/sent"
-  update (Action_SetResponse $ fromMaybe "No Response!" response)
+  dispatch (Action_SetResponse $ fromMaybe "No Response!" response)
 
 backendPost :: BackendRoute -> IO (Maybe BS.ByteString)
 backendPost route =
@@ -50,17 +51,17 @@ backendPost route =
   }
 
 
-runAction :: (AppAction -> IO ()) -> AppAction -> AppData -> IO AppData
-runAction update Action_SendFriendRequest = actionSendFriendRequest update
-runAction _ (Action_SetSender jsVal) = actionSetSender jsVal
-runAction _ (Action_SetRecipient jsVal) = actionSetRecipient jsVal
-runAction _ (Action_SetResponse bs) = actionSetResponse bs
+runAction :: AppAction -> AppData -> IO AppData
+runAction Action_SendFriendRequest = actionSendFriendRequest
+runAction (Action_SetSender jsVal) = actionSetSender jsVal
+runAction (Action_SetRecipient jsVal) = actionSetRecipient jsVal
+runAction (Action_SetResponse bs) = actionSetResponse bs
 
-actionSendFriendRequest :: (AppAction -> IO ()) -> AppData -> IO AppData
-actionSendFriendRequest update appData = do
+actionSendFriendRequest :: AppData -> IO AppData
+actionSendFriendRequest appData = do
   case friendRequestRoute appData of
     Nothing -> pure ()
-    Just route -> void $ forkIO $ sendFriendRequest update route
+    Just route -> void $ forkIO $ sendFriendRequest route
 
   pure appData
 
